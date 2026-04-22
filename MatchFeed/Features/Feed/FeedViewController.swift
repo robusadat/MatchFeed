@@ -81,6 +81,10 @@ final class FeedViewController: UIViewController {
             ) as! ProfileCardCell
             if let profile = self?.viewModel.profiles.first(where: { $0.id == profileId }) {
                 cell.configure(with: profile)
+                cell.onSwipe = { [weak self] direction in
+                    guard let profile = self?.viewModel.profiles.first(where: { $0.id == profileId }) else { return }
+                    Task { await self?.viewModel.swipe(profile: profile, direction: direction) }
+                }
             }
             Task { await self?.viewModel.loadMoreIfNeeded(currentIndex: indexPath.item) }
             return cell

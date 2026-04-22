@@ -3,6 +3,7 @@ import UIKit
 final class ProfileCardCell: UICollectionViewCell {
 
     static let reuseID = "ProfileCardCell"
+    var onSwipe: ((SwipeDirection) -> Void)?
 
     // MARK: - Views
 
@@ -103,5 +104,34 @@ final class ProfileCardCell: UICollectionViewCell {
             nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
             nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
         ])
+        
+        let panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
+        addGestureRecognizer(panGesture)
+    }
+    
+    // MARK: - Functions
+    
+    @objc private func handlePan(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: self)
+        
+        switch gesture.state {
+        case .changed:
+            transform = CGAffineTransform(translationX: translation.x, y: translation.y / 4)
+                .rotated(by: translation.x / 300)
+                
+        case .ended:
+            if translation.x > 100 {
+                onSwipe?(.like)
+                UIView.animate(withDuration: 0.3) { self.transform = CGAffineTransform(translationX: 500, y: 0) }
+            } else if translation.x < -100 {
+                onSwipe?(.pass)
+                UIView.animate(withDuration: 0.3) { self.transform = CGAffineTransform(translationX: -500, y: 0) }
+            } else {
+                UIView.animate(withDuration: 0.3) { self.transform = .identity }
+            }
+            
+        default:
+            break
+        }
     }
 }
