@@ -13,6 +13,8 @@ struct RemoteUser: Codable {
     let dob:      Dob
     let location: Location
     let picture:  Picture
+    let email: String
+    let gender: String
 
     struct Login:    Codable { let uuid: String }
     struct Name:     Codable { let first: String; let last: String }
@@ -39,6 +41,8 @@ struct UserProfile: Identifiable, Hashable {
     let country: String
     let photoURL: URL?
     let thumbnailURL: URL?
+    let email: String
+    let gender: String
 
     var displayName: String { "\(firstName), \(age)" }
     var location:    String { "\(city), \(country)" }
@@ -55,6 +59,8 @@ extension UserProfile {
         self.age         = remote.dob.age
         self.city        = remote.location.city
         self.country     = remote.location.country
+        self.email  = remote.email
+        self.gender = remote.gender
         self.photoURL    = URL(string: remote.picture.large)
         self.thumbnailURL = URL(string: remote.picture.thumbnail)
     }

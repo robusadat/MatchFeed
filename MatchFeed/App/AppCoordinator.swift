@@ -7,6 +7,7 @@ import SwiftUI
 final class AppCoordinator {
 
     let navigationController: UINavigationController
+    weak var feedViewModel: FeedViewModel?
 
     init(navigationController: UINavigationController = UINavigationController()) {
         self.navigationController = navigationController
@@ -24,6 +25,7 @@ final class AppCoordinator {
     func showFeed() {
         let vm = FeedViewModel()
         let vc = FeedViewController(viewModel: vm)
+        feedViewModel = vm
         vc.coordinator = self
         // Pass the coordinator down so the VC can call showChat(with:)
         // In a real coordinator pattern you'd use a delegate or closure:
@@ -36,5 +38,21 @@ final class AppCoordinator {
         let hostingVC = UIHostingController(rootView: chatView)
         hostingVC.title = profile.firstName
         navigationController.pushViewController(hostingVC, animated: true)
+    }
+    
+    func showProfile(for profile: UserProfile) {
+        let view = ProfileView(
+            profile: profile,
+            onLike: { [weak self] in
+                Task { await self?.feedViewModel?.swipe(profile: profile, direction: .like) }
+                self?.navigationController.popViewController(animated: true)
+            },
+            onPass: { [weak self] in
+                Task { await self?.feedViewModel?.swipe(profile: profile, direction: .pass) }
+                self?.navigationController.popViewController(animated: true)
+            }
+        )
+        let vc = UIHostingController(rootView: view)
+        navigationController.pushViewController(vc, animated: true)
     }
 }

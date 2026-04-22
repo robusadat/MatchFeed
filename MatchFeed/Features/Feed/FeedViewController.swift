@@ -33,6 +33,7 @@ final class FeedViewController: UIViewController {
         title = "Discover"
         view.backgroundColor = .systemBackground
         setupCollectionView()
+        setupActionButtons()
         setupDataSource()
         observeViewModel()
         Task { await viewModel.loadInitial() }
@@ -51,8 +52,56 @@ final class FeedViewController: UIViewController {
             ProfileCardCell.self,
             forCellWithReuseIdentifier: ProfileCardCell.reuseID
         )
+        collectionView.isScrollEnabled = false
         collectionView.delegate = self
         view.addSubview(collectionView)
+    }
+    
+    private func setupActionButtons() {
+        let passButton = makeActionButton(systemImage: "xmark", color: .systemRed)
+        let likeButton = makeActionButton(systemImage: "heart.fill", color: .systemPink)
+        
+        let stack = UIStackView(arrangedSubviews: [passButton, likeButton])
+        stack.distribution = .equalSpacing
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(stack)
+        
+        NSLayoutConstraint.activate([
+            stack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 80),
+            stack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -80),
+            stack.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            stack.heightAnchor.constraint(equalToConstant: 64),
+        ])
+        
+        passButton.addTarget(self, action: #selector(didTapPass), for: .touchUpInside)
+        likeButton.addTarget(self, action: #selector(didTapLike), for: .touchUpInside)
+    }
+
+    private func makeActionButton(systemImage: String, color: UIColor) -> UIButton {
+        let button = UIButton()
+        let config = UIImage.SymbolConfiguration(pointSize: 24, weight: .medium)
+        button.setImage(UIImage(systemName: systemImage, withConfiguration: config), for: .normal)
+        button.tintColor = color
+        button.backgroundColor = .white
+        button.layer.cornerRadius = 32
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOpacity = 0.1
+        button.layer.shadowOffset = CGSize(width: 0, height: 4)
+        button.layer.shadowRadius = 8
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.widthAnchor.constraint(equalToConstant: 64).isActive = true
+        button.heightAnchor.constraint(equalToConstant: 64).isActive = true
+        return button
+    }
+
+    @objc private func didTapPass() {
+        guard let profile = viewModel.profiles.first else { return }
+        Task { await viewModel.swipe(profile: profile, direction: .pass) }
+    }
+
+    @objc private func didTapLike() {
+        guard let profile = viewModel.profiles.first else { return }
+        Task { await viewModel.swipe(profile: profile, direction: .like) }
     }
 
     private func makeLayout() -> UICollectionViewLayout {
@@ -62,11 +111,11 @@ final class FeedViewController: UIViewController {
             heightDimension: .fractionalHeight(1.0)
         )
         let item  = NSCollectionLayoutItem(layoutSize: itemSize)
-        item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 8, leading: 16, bottom: 32, trailing: 16)
 
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .absolute(440)
+            heightDimension: .absolute(UIScreen.main.bounds.height * 0.70)
         )
         let group   = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
@@ -155,8 +204,7 @@ extension FeedViewController: UICollectionViewDataSourcePrefetching {
 extension FeedViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard let profile = viewModel.profiles[safe: indexPath.item] else { return }
-        coordinator?.showChat(with: profile)
-    }
+        coordinator?.showProfile(for: profile)    }
 }
 
 // MARK: - Helpers
