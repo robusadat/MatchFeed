@@ -1,10 +1,10 @@
 import UIKit
 import SwiftUI
 
-// MARK: - AppCoordinator
+// MARK: - DiscoverCoordinator
 // Owns navigation — ViewModels never import UIKit or know about routing.
 
-final class AppCoordinator {
+final class DiscoverCoordinator {
 
     let navigationController: UINavigationController
     weak var feedViewModel: FeedViewModel?

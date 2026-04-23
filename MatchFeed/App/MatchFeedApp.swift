@@ -19,13 +19,13 @@ struct MatchFeedApp: App {
 
 final class AppDelegate: NSObject, UIApplicationDelegate {
 
-    var coordinator: AppCoordinator!
+    var coordinator: RootCoordinator!
 
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        coordinator = AppCoordinator()
+        coordinator = RootCoordinator()
         coordinator.start()
         return true
     }
@@ -35,11 +35,10 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
 /// Wraps the coordinator's UINavigationController so SwiftUI's WindowGroup can host it.
 struct CoordinatorView: UIViewControllerRepresentable {
-    let coordinator: AppCoordinator
-
-    func makeUIViewController(context: Context) -> UINavigationController {
-        coordinator.navigationController
+    let coordinator: RootCoordinator
+    
+    func makeUIViewController(context: Context) -> UITabBarController {
+        coordinator.tabBarController
     }
-
-    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {}
+    func updateUIViewController(_ uiViewController: UITabBarController, context: Context) {}
 }

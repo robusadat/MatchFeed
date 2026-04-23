@@ -17,7 +17,7 @@ final class FeedViewController: UIViewController {
     private let viewModel: FeedViewModel
     private var collectionView: UICollectionView!
     private var dataSource: FeedDataSource!
-    var coordinator: AppCoordinator?
+    var coordinator: DiscoverCoordinator?
 
     // MARK: - Init
     init(viewModel: FeedViewModel = FeedViewModel()) {
